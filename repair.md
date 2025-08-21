@@ -117,3 +117,84 @@ Testing suggestions
 - Add minimal Jest + jsdom tests for `abbreviationPlugin` and `pairedCharPlugin`. For ProseMirror plugins, use the test helpers from ProseMirror (or plain small doc/EditorState runs) to verify plugin.apply/props behaviors.
 
 If you want I can start with PR1 now and implement the immediate, safety-critical fixes. Which of the immediate actions should I do first? I recommend starting with the import/path fix and the popover left fix (two small, fast PRs) and then the placeholder improvement.
+
+
+---
+
+Architecture review — how components, dispatcher and plugins interact
+
+Goal
+- Evaluate how `AbbreviationComponent` (UI), `ProseMirroDispatcher` (bridge) and `abbreviationPlugin` (editor behavior) interact, list risks, and propose a cleaner architecture.
+
+Current flow (existing code)
+- `AbbreviationComponent.jsx` is a React UI that manages the list of abbreviations and writes them to `localStorage` and dispatches a browser CustomEvent `abbreviation-update`.
+- `ProseMirroDispatcher.jsx` listens for that CustomEvent and, when the `ProseMirror` view is available via `useEditorEffect`, dispatches a transaction with meta keyed by `abbreviationPluginKey` to update the plugin state.
+- `abbreviationPlugin.js` stores abbreviations in plugin state and listens for `handleKeyDown` to trigger replacements.
+
+Strengths of current design
+- Clear separation of concerns: UI component owns persistence and editing; dispatcher bridges UI and ProseMirror plugin; plugin only implements editor logic.
+- Minimal coupling: components do not import ProseMirror view directly.
+
+Risks and issues
+- Fragile coupling via CustomEvent: global events are implicit and hard to trace; if multiple editor instances exist they will all receive the same event.
+- Initialization race: if `abbreviation-update` fires before ProseMirror view is ready, `ProseMirroDispatcher` stores a pending object; this is handled but it's implicit and scattered.
+- Import path fragility: incorrect relative imports (as found) can break the bridge.
+- No versioning or payload validation for abbreviation updates — malformed payloads will silently fail.
+- Global localStorage as single source of truth prevents multi-document scoping (can't have per-note scoped abbreviations easily).
+
+Recommended architecture improvements (concrete)
+
+1) Replace CustomEvent with explicit API surface exported from dispatcher
+- Create `src/Editor/abbrevApi.js` with functions:
+  - `initAbbrevForView(view, initialAbbrevs)` — attaches abbrev to a particular view via TR or plugin meta
+  - `updateAbbrevsForView(view, abbrevObj)` — update for a specific view
+  - `broadcastAbbrevUpdate(abbrevObj)` — optional global broadcast (for multi-editor apps)
+- Benefits: explicit imports, type-safety, easier to test, avoids global event bus surprises.
+
+2) Move persistence out of UI component (optional but recommended)
+- Create a small persistence module `src/Editor/abbrevStore.js` exposing get/set for abbreviations and supporting namespaced stores (per-note). UI components import and call store APIs; dispatchers read from store and push to plugin.
+- This enables per-note scoped abbreviations by passing a `namespace` argument.
+
+3) Make dispatcher per-editor-instance and explicit
+- Currently `ProseMirroDispatcher` is a React component that uses `useEditorEffect` to get the view and push initial state. Keep it, but make its API explicit: accept props `initialAbbrevs` and `namespace`. Do not rely on global events. Example:
+
+```jsx
+<ProseMirror>
+  <ProseMirrorDoc />
+  <ProseMirrorDispatcher initialAbbrevs={initial} namespace={noteId} />
+</ProseMirror>
+```
+
+4) Validate abbreviation payloads before dispatch
+- `abbrevApi.updateAbbrevsForView` should validate shape (array vs object, keys are strings, values have `full`) and normalize keys before dispatching.
+
+5) Plugin extension points
+- Change `abbreviationPlugin` into a factory `abbreviationPlugin(options)` where `options` can include `allowedNodeTypes`, `triggers`, `namespaceResolver`.
+- This allows each editor instance to create a plugin instance configured for its note type and namespace and prevents global state collisions.
+
+6) Consider using plugin state for per-view scoping rather than global events
+- Each editor instance should have its own abbreviation plugin instance (created via factory) and receive its initial config via plugin state when the view is created. `ProseMirroDispatcher` would then call `initAbbrevForView(view, obj)` which dispatches a TR with the plugin key for that view's plugin instance.
+
+Example improved flow
+1. App reads saved abbreviations from `abbrevStore.get(namespace)`.
+2. Editor mounts and creates plugin instances with per-view options: `abbreviationPlugin({ namespace })`.
+3. `ProseMirroDispatcher` calls `initAbbrevForView(view, initialObj)`.
+4. `AbbreviationComponent` edits the store via `abbrevStore.set(namespace, entries)` and calls `abbrevApi.updateAbbrevsForView(view, entries)` (explicit view) or `abbrevApi.broadcastAbbrevUpdate(entries)` if desired.
+
+Benefits summary
+- Explicit view-scoped APIs remove global event reliance and make multi-editor scenarios robust.
+- Plugin factory pattern allows per-view customization and safer application of abbreviations.
+- Small persistence layer enables namespacing and future cloud sync without UI changes.
+
+Small incremental migration plan
+- Step 1: Extract `abbrevApi.js` and change `ProseMirroDispatcher` to import and use its `initAbbrevForView` instead of listening to window events.
+- Step 2: Implement `abbrevStore.js` and update `AbbreviationComponent` to use it.
+- Step 3: Make `abbreviationPlugin` a factory and update Editor creation to call `abbreviationPlugin({ namespace })`.
+
+Notes about testing & observability
+- Add console.debug lines in `abbrevApi` during migration only to validate flow.
+- Add unit tests for `abbrevApi` and `abbrevStore` to validate normalization, namespacing, and update flows.
+
+---
+
+End of architecture review.
