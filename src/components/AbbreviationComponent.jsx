@@ -1,163 +1,174 @@
-import React, { useState, useRef, useLayoutEffect, useEffect } from 'react';
-import { Drawer } from 'vaul';
-import './AbbreviationComponent.css';
+import { useState, useEffect, useRef } from "react";
+import { Ellipsis, X } from "lucide-react";
+import './AbbreviationComponent.css'
 
 const defaultAbbreviations = [
-    ['js', 'JavaScript'],
-    ['css', 'Cascading Style Sheets'],
-    ['py', 'Python'],
-    ['html', 'Hypertext Markup Language'],
-    ['abvr', 'Abréviation'],
+    { short: "js", full: "JavaScript", caseMatching: false, dynamic: true },
+    { short: "css", full: "Cascading Style Sheets", caseMatching: false, dynamic: true },
+    { short: "py", full: "Python", caseMatching: false, dynamic: true },
+    { short: "html", full: "Hypertext Markup Language", caseMatching: false, dynamic: true },
+    { short: "abvr", full: "Abréviation", caseMatching: false, dynamic: false },
 ];
 
 export default function AbbreviationComponent() {
     const [rows, setRows] = useState([]);
-    const rowRefs = useRef({});
-    const newRowIdRef = useRef(null);
+    const [activePopoverId, setActivePopoverId] = useState(null);
+    const [popoverPos, setPopoverPos] = useState({ top: 0, left: 0 });
+    const buttonRefs = useRef({});
 
     // Chargement initial
     useEffect(() => {
-        const stored = localStorage.getItem('abbreviations');
-        const initialEntries = stored
-            ? JSON.parse(stored)
-            : defaultAbbreviations;
-
-        const initialRows = initialEntries.map(([short, full]) => ({
-            id: Date.now() + Math.random(),
-            short,
-            full,
-        }));
-
-        setRows(initialRows);
-
-        // Dispatch initial
-        const map = new Map(initialRows.map(r => [r.short, r.full]));
-        Promise.resolve().then(() =>
-            window.dispatchEvent(
-                new CustomEvent('abbreviation-update', { detail: map })
-            )
-        );
+        const stored = localStorage.getItem("abbreviations");
+        const initialEntries = stored ? JSON.parse(stored) : defaultAbbreviations;
+        setRows(initialEntries.map(r => ({
+            id: "abbr-" + crypto.randomUUID(),
+            short: r.short,
+            full: r.full,
+            caseMatching: r.caseMatching ?? false,
+            dynamic: r.dynamic ?? false
+        })));
     }, []);
 
-    // Focus sur la nouvelle ligne
-    useLayoutEffect(() => {
-        if (newRowIdRef.current && rowRefs.current[newRowIdRef.current]?.short) {
-            rowRefs.current[newRowIdRef.current].short.focus();
-            newRowIdRef.current = null;
-        }
+    // Auto-save
+    useEffect(() => {
+        if (rows.length === 0) return;
+        const timeout = setTimeout(() => {
+            const entries = rows
+                .map(r => ({
+                    short: r.short.trim(),
+                    full: r.full.trim(),
+                    caseMatching: r.caseMatching,
+                    dynamic: r.dynamic
+                }))
+                .filter(r => r.short && r.full);
+            localStorage.setItem("abbreviations", JSON.stringify(entries));
+            window.dispatchEvent(new CustomEvent("abbreviation-update", { detail: entries }));
+        }, 500);
+        return () => clearTimeout(timeout);
     }, [rows]);
 
+    const updateRow = (id, field, value) => {
+        setRows(prev => prev.map(r => (r.id === id ? { ...r, [field]: value } : r)));
+    };
+
     const addRow = () => {
-        const newId = Date.now() + Math.random();
-        setRows(prev => [...prev, { id: newId, short: '', full: '' }]);
-        newRowIdRef.current = newId;
+        setRows(prev => [
+            ...prev,
+            { id: "abbr-" + crypto.randomUUID(), short: "", full: "", caseMatching: false, dynamic: false }
+        ]);
     };
 
-    const removeRow = id => {
+    const removeRow = (id) => {
         setRows(prev => prev.filter(r => r.id !== id));
-        delete rowRefs.current[id];
+        if (activePopoverId === id) setActivePopoverId(null);
     };
 
+    const togglePopover = (id) => {
+        const buttonEl = buttonRefs.current[id];
+        if (!buttonEl) return;
 
-    const handleEnter = (e, field, id) => {
-        if (e.key !== 'Enter') return;
-        e.preventDefault();
-
-        const index = rows.findIndex(r => r.id === id);
-        if (index === -1) return;
-
-        if (field === 'short') {
-            rowRefs.current[id]?.full?.focus();
-        } else if (field === 'full') {
-            const row = rows[index];
-            if ((row.short || '').trim() || (row.full || '').trim()) addRow();
-        }
+        const rect = buttonEl.getBoundingClientRect();
+        setPopoverPos({ top: rect.bottom + window.scrollY, left: rect.left + window.scrollX });
+        setActivePopoverId(activePopoverId === id ? null : id);
     };
 
-    const saveChanges = form => {
-        const data = new FormData(form);
-        const shorts = data.getAll('short[]').map(s => s.trim().toLowerCase());
-        const fulls = data.getAll('full[]').map(f => f.trim());
-        const entries = shorts
-            .map((s, i) => [s, fulls[i]])
-            .filter(([s, f]) => s && f);
-
-        const newRows = entries.map(([short, full]) => ({ id: Date.now() + Math.random(), short, full }));
-        setRows(newRows)
-        localStorage.setItem('abbreviations', JSON.stringify(entries));
-        console.log(entries, localStorage.getItem('abbreviations'))
-        const map = new Map(entries);
-        window.dispatchEvent(new CustomEvent('abbreviation-update', { detail: map }));
-    };
+    // Fermeture clic hors popover
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (activePopoverId === null) return;
+            const popoverEl = document.getElementById(`popover-${activePopoverId}`);
+            const buttonEl = buttonRefs.current[activePopoverId];
+            if (!popoverEl || !buttonEl) return;
+            if (!popoverEl.contains(e.target) && !buttonEl.contains(e.target)) {
+                setActivePopoverId(null);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [activePopoverId]);
 
     if (rows.length === 0) return <div>Loading abbreviations...</div>;
 
     return (
-        <Drawer.Root  onAnimationEnd={open => { if (!open) saveChanges(document.querySelector('form')); }}>
-            <Drawer.Trigger className="drawer-trigger">
-                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3">
-                    <path d="M433-80q-27 0-46.5-18T363-142l-9-66q-13-5-24.5-12T307-235l-62 26q-25 11-50 2t-39-32l-47-82q-14-23-8-49t27-43l53-40q-1-7-1-13.5v-27q0-6.5 1-13.5l-53-40q-21-17-27-43t8-49l47-82q14-23 39-32t50 2l62 26q11-8 23-15t24-12l9-66q4-26 23.5-44t46.5-18h94q27 0 46.5 18t23.5 44l9 66q13 5 24.5 12t22.5 15l62-26q25-11 50-2t39 32l47 82q14 23 8 49t-27 43l-53 40q1 7 1 13.5v27q0 6.5-2 13.5l53 40q21 17 27 43t-8 49l-48 82q-14 23-39 32t-50-2l-60-26q-11 8-23 15t-24 12l-9 66q-4 26-23.5 44T527-80h-94Zm7-80h79l14-106q31-8 57.5-23.5T639-327l99 41 39-68-86-65q5-14 7-29.5t2-31.5q0-16-2-31.5t-7-29.5l86-65-39-68-99 42q-22-23-48.5-38.5T533-694l-13-106h-79l-14 106q-31 8-57.5 23.5T321-633l-99-41-39 68 86 64q-5 15-7 30t-2 32q0 16 2 31t7 30l-86 65 39 68 99-42q22 23 48.5 38.5T427-266l13 106Zm42-180q58 0 99-41t41-99q0-58-41-99t-99-41q-59 0-99.5 41T342-480q0 58 40.5 99t99.5 41Zm-2-140Z" />
-                </svg>
-            </Drawer.Trigger>
-            <Drawer.Portal>
-                <Drawer.Overlay className="drawer-overlay" />
-                <Drawer.Content className="drawer-content">
-                    <Drawer.Title className="drawer-title">Gérer les abréviations</Drawer.Title>
-                    <Drawer.Description className='drawer-description'>
-                        Crée tes abréviations personnalisées pour une prise de note rapide et adaptée.
-                    </Drawer.Description>
-
-                    <form id='abbrev-form'>
-                        {rows.map(row => (
-                            <fieldset key={row.id} className="abbrev-fieldset">
+        <>
+            <form id="abbrev-form">
+                <ul className="block-list">
+                    {rows.map(row => (
+                        <li key={row.id}>
+                            <fieldset>
                                 <input
+                                    id={`short-${row.id}`}
                                     type="text"
-                                    name="short[]"
-                                    defaultValue={row.short}
+                                    name="short"
+                                    value={row.short}
+                                    onChange={e => updateRow(row.id, "short", e.target.value)}
                                     placeholder="Abbr"
-                                    maxLength="4"
-                                    size='4'
-                                    ref={el => {
-                                        if (el) {
-                                            rowRefs.current[row.id] = rowRefs.current[row.id] || {};
-                                            rowRefs.current[row.id].short = el;
-                                        } else {
-                                            // l’élément est démonté, supprimer la référence
-                                            if (rowRefs.current[row.id]) {
-                                                delete rowRefs.current[row.id].short;
-                                            }
-                                        }
-                                    }}
-
-                                    onKeyDown={e => handleEnter(e, 'short', row.id)}
+                                    maxLength={4}
+                                    size={4}
                                 />
-                                <span className='abbrev-decorator'></span>
+                                <span className="abbrev-decorator"></span>
                                 <input
+                                    id={`full-${row.id}`}
                                     type="text"
-                                    name="full[]"
-                                    defaultValue={row.full}
+                                    name="full"
+                                    value={row.full}
+                                    onChange={e => updateRow(row.id, "full", e.target.value)}
                                     placeholder="Full term"
-                                    ref={el => {
-                                        if (el) {
-                                            rowRefs.current[row.id] = rowRefs.current[row.id] || {};
-                                            rowRefs.current[row.id].full = el;
-                                        } else {
-                                            if (rowRefs.current[row.id]) {
-                                                delete rowRefs.current[row.id].full;
-                                            }
-                                        }
-                                    }}
-
-                                    onKeyDown={e => handleEnter(e, 'full', row.id)}
                                 />
-                                <button type="button" className='abbrev-delete' onClick={() => removeRow(row.id)}>✕</button>
-                            </fieldset>
-                        ))}
-                    </form>
 
-                    <button type="button" onClick={addRow} className="abbrev-add">+ Ajouter une abréviation</button>
-                </Drawer.Content>
-            </Drawer.Portal>
-        </Drawer.Root>
+                                <button
+                                    type="button"
+                                    className="abbrev-more"
+                                    ref={el => buttonRefs.current[row.id] = el}
+                                    onClick={() => togglePopover(row.id)}
+                                >
+                                    <Ellipsis />
+                                </button>
+
+                                {activePopoverId === row.id && (
+                                    <div
+                                        id={`popover-${row.id}`}
+                                        className="abbrev-popup"
+                                        style={{
+                                            position: "absolute",
+                                            top: popoverPos.top,
+                                            left: popoverPos.right,
+                                            zIndex: 1000
+                                        }}
+                                    >
+                                        <label>
+                                            <input
+                                                type="checkbox"
+                                                checked={row.caseMatching}
+                                                onChange={e => updateRow(row.id, "caseMatching", e.target.checked)}
+                                            />
+                                            <h4>Case matching</h4>
+                                            <p>Si activé, l’abréviation doit correspondre exactement à la casse de votre saisie (ex: 'JS' ≠ 'js')."</p>
+                                        </label>
+
+                                        <label>
+                                            <input
+                                                type="checkbox"
+                                                checked={row.dynamic}
+                                                onChange={e => updateRow(row.id, "dynamic", e.target.checked)}
+                                            />
+                                            <h4>Dynamic</h4>
+                                            <p>Si activé, la sortie s’adapte à la casse de votre saisie (ex: 'JS' → 'JAVASCRIPT', 'js' → 'javascript')."</p>
+                                        </label>
+
+                                        <button type="button" onClick={() => removeRow(row.id)}>
+                                            <X />
+                                        </button>
+                                    </div>
+                                )}
+                            </fieldset>
+                        </li>
+                    ))}
+                </ul>
+            </form>
+            <button type="button" onClick={addRow} className="abbrev-add">
+                + Ajouter une abréviation
+            </button>
+        </>
     );
 }

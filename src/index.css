@@ -118,8 +118,7 @@ h6 {
   }
 }
 
-nav {
-  display: flex;
-  justify-content: space-between;
-  margin: 1rem;
+main {
+  width: min(45rem, calc(100% - 2rem));
+  margin: 2rem auto;
 }

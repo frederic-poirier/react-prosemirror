@@ -37,7 +37,7 @@ export default function Editor() {
   );
 
   return (
-    <main>
+    <main className="editor">
       <input type="text" name="title" id="editor-title" placeholder="Title" />
       <ProseMirror
         state={state}

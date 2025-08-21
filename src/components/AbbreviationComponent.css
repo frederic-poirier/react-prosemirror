@@ -1,119 +1,52 @@
-/* Overlay du Drawer */
-.drawer-overlay {
-    position: fixed;
-    inset: 0;
-    background-color: rgba(0, 0, 0, 0.6);
-}
+.block-list {
 
-/* Contenu du Drawer */
-.drawer-content {
-    border-radius: 1rem;
-    position: fixed;
-    bottom: 0;
-    right: 0;
-    left: 0;
-    background-color: var(--color-gray-100);
-    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
-    display: flex;
-    height: 60vh;
-    flex-direction: column;
-    padding: 1rem;
-    overflow-y: scroll;
-    scrollbar-width: none;
-    gap: 0.25rem;
-
-    >*:not(p) {
-        margin-inline: auto;
-        width: min(600px, 100%);
-        padding: 0;
-    }
-
-
-    &::after {
-        display: none;
-    }
-
-    button,
-    input {
+    button {
         background: none;
         border: none;
     }
-}
 
-/* Titre */
-.drawer-title {
-    font-size: 1.15rem;
-    font-weight: 600;
-    position: sticky;
-    margin-top: 0.5rem;
-    top: 0.5rem;
-    background-color: var(--color-gray-100);
 
-    &::before {
-        content: '';
-        width: 3rem;
-        height: 0.35rem;
-        transform: translateY(-200%);
-        background-color: var(--color-gray-300);
-        border-radius: 0.175rem;
-        display: block;
-        justify-self: center;
-        margin-bottom: 1.5rem;
-    }
-}
+    fieldset {
+        border: none;
+        display: flex;
+        padding: 0.5rem;
 
-.drawer-description {
-    font-size: 0;
-    visibility: hidden;
-}
-
-/* Inputs */
-.abbrev-fieldset {
-    border: none;
-    padding: 0.5rem 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: start;
-
-    &:not(:last-of-type) {
-        border-bottom: 1px solid var(--color-gray-100);
     }
 
     input {
         flex: 1;
         border-radius: 4px;
         font-size: 1rem;
+        background: none;
+        border: none;
 
         &:focus {
             outline: none;
         }
     }
 
-    input[name='short[]'] {
+    input[name='short'] {
         font-family: var(--font-mono);
         text-transform: uppercase;
-        max-width: 5.5ch;
+        max-width: 5ch;
         color: var(--color-gray-500);
     }
 }
 
 .abbrev-decorator::after {
-    content: '->';
+    content: '→';
     color: var(--color-gray-500);
     margin-right: 1ch;
 }
 
 
 
-#abbrev-form {
+.block-list {
 
-    background-color: var(--color-gray-150);
-    border-radius: 1rem;
-    padding: 0.25rem;
-
-    fieldset:focus-within,
-    &:not(:focus-within) fieldset:hover {
-        .abbrev-delete {
+    li:focus-within,
+    &:not(:focus-within) li:hover,
+    li:has(.abbrev-popup) {
+        .abbrev-more {
             visibility: visible;
             opacity: 1;
             transform: scale(1);
@@ -122,27 +55,90 @@
         }
     }
 
+    .abbrev-popup {
+        position-anchor: --button;
+        top: anchor(bottom);
+        right: anchor(right);
+        left: unset;
+        padding: 0.25rem;
+        border-radius: 0.5rem;
+        background-color: var(--color-gray-150);
+        color: inherit;
+        border: 1px solid var(--color-gray-200);
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+
+        label {
+            padding: 0.25rem;
+            align-items: center;
+            justify-content: start;
+            position: relative;
+
+            display: grid;
+            grid-template-columns: auto 1fr;
+        }
+        
+        input {
+            margin-right: 1.5rem;
+               grid-template-columns: 1;
+               display: block;
+               width: 100%;
+            appearance: none;
+        }
+
+        input::before {
+            content: '';
+            border: 1.5px solid var(--color-gray-200);
+            border-radius: 0.25rem;
+            position: absolute;
+            width: 1rem;
+            height: 1rem;
+            left: 0.25rem;
+            top: 1ch;
+            grid-template-columns: 1;  
+        }
+
+        input:checked::after {
+            content: '';
+            background-color: var(--color-gray-900);
+            border-radius: 0.25rem;
+            position: absolute;
+            width: 1rem;
+            height: 1rem;
+            left: 0.25rem;
+            top: 1ch;
+  
+        }
+
+        p {
+            grid-column: 2;
+            color: var(--color-gray-500);
+            font-size: 0.875rem;
+            max-width: 35ch;
+        }
 
 
-    .abbrev-delete {
+        button {
+            background-color: var(--color-gray-200);
+            place-content: center;
+            display: grid;
+            border-radius: 0.25rem;
+            padding: 0.25rem;
+        }
+    }
+
+
+
+    .abbrev-more {
         visibility: hidden;
         opacity: 0;
         transform: scale(0.8);
         transition: all 0.2s ease;
+        background: none;
+        border: none;
+        anchor-name: --button;
     }
-}
-
-
-.drawer-trigger {
-    background-color: var(--color-gray-200);
-    border: none;
-    padding: 0.5rem;
-    border-radius: 0.5rem;
-
-    svg {
-        fill: var(--color-gray-500)
-    }
-
 }
 
 button.abbrev-add {
@@ -153,4 +149,14 @@ button.abbrev-add {
     cursor: pointer;
     font-size: 0.875rem;
     transition: all 0.2s cubic-bezier(0.19, 1, 0.22, 1);
+    margin-bottom: 6rem;
+    background: none;
+    border: none;
+}
+
+
+.abbrev-popup {
+    display: grid ;
+    grid-template-columns: 1fr auto;
+    gap: 0.5rem;
 }
