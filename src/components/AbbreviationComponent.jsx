@@ -143,7 +143,7 @@ export default function AbbreviationComponent() {
                                                 onChange={e => updateRow(row.id, "caseMatching", e.target.checked)}
                                             />
                                             <h4>Case matching</h4>
-                                            <p>Si activé, l’abréviation doit correspondre exactement à la casse de votre saisie (ex: 'JS' ≠ 'js')."</p>
+                                            <p>Si activé, l’abréviation doit correspondre exactement à la casse de votre saisie </p>
                                         </label>
 
                                         <label>
@@ -153,11 +153,11 @@ export default function AbbreviationComponent() {
                                                 onChange={e => updateRow(row.id, "dynamic", e.target.checked)}
                                             />
                                             <h4>Dynamic</h4>
-                                            <p>Si activé, la sortie s’adapte à la casse de votre saisie (ex: 'JS' → 'JAVASCRIPT', 'js' → 'javascript')."</p>
+                                            <p>Si activé, la sortie s’adapte à la casse de votre saisie</p>
                                         </label>
 
                                         <button type="button" onClick={() => removeRow(row.id)}>
-                                            <X />
+                                            Remove
                                         </button>
                                     </div>
                                 )}
