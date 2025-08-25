@@ -99,7 +99,7 @@ Other small issues & suggestions
 
 Proposed immediate actions (small PRs)
 - PR1 (critical fixes):
-  - Fix import path in `ProseMirroDispatcher.jsx` (`../Editor/plugins/...` -> `./plugins/...`).
+  [x] Fix import path in `ProseMirroDispatcher.jsx` (`../Editor/plugins/...` -> `./plugins/...`).
   - Fix popover inline style in `AbbreviationComponent.jsx` to use `popoverPos.left` not `.right`.
   - Remove `console.log` from `pairedCharPlugin.js`.
   - Update `placeholderPlugin.js` to at least iterate doc and add per-node placeholders (minimal change) — implement the node iteration and per-node Decoration creation.

@@ -6,12 +6,17 @@ export const abbreviationPlugin = new Plugin({
   key: abbreviationPluginKey,
   state: {
     init() {
-      return {}; // objet vide au lieu d’une Map
+      return new Map(); // plugin state = Map
     },
     apply(tr, value) {
       const meta = tr.getMeta(abbreviationPluginKey);
-      if (meta?.type === "update") {
-        return meta.abbreviations || {}; // objet {short: {...}}
+      if (meta?.type === "update" && Array.isArray(meta.abbreviations)) {
+        const map = new Map();
+        for (const entry of meta.abbreviations) {
+          if (!entry.short) continue;
+          map.set(entry.short.toLowerCase(), entry);
+        }
+        return map;
       }
       return value;
     },
@@ -20,7 +25,7 @@ export const abbreviationPlugin = new Plugin({
     handleKeyDown(view, event) {
       const key = event.key;
       const pluginState = abbreviationPluginKey.getState(view.state);
-      if (key === " " && pluginState && Object.keys(pluginState).length > 0) {
+      if (key === " " && pluginState && pluginState.size > 0) {
         return abbreviate(event, view.dispatch, view.state, pluginState);
       }
       return false;
@@ -28,26 +33,24 @@ export const abbreviationPlugin = new Plugin({
   },
 });
 
-function abbreviate(event, dispatch, state, abbrevObj) {
+function abbreviate(event, dispatch, state, abbrevMap) {
   const { $from } = state.selection;
   const textBefore = $from.parent.textBetween(0, $from.parentOffset);
   const lastWord = textBefore.split(/\s+/).pop();
   if (!lastWord) return false;
 
   const lowerWord = lastWord.toLowerCase();
-  const entry = abbrevObj[lowerWord];
+  const entry = abbrevMap.get(lowerWord);
   if (!entry) return false;
 
-  let shouldReplace = true;
   let replacement = entry.full;
+  let shouldReplace = true;
 
   if (entry.caseMatching) {
     // Vérifie si la casse doit correspondre strictement
-    if (abbrevObj[lastWord]) {
-      replacement = abbrevObj[lastWord].full;
-    } else {
-      shouldReplace = false;
-    }
+    const exactEntry = abbrevMap.get(lastWord);
+    if (exactEntry) replacement = exactEntry.full;
+    else shouldReplace = false;
   }
 
   if (shouldReplace) {

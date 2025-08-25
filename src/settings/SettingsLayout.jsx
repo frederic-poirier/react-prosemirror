@@ -20,9 +20,6 @@ export default function SettingsLayout() {
 const Breadcrumbs = () => {
     const location = useLocation();
     const segments = location.pathname.split('/').filter(Boolean)
-
-    console.log(segments)
-
     const crumbs = segments.map((segment, index) => {
         const to = "/" + segments.slice(0, index + 1).join("/")
         const label = segment;
