@@ -3,8 +3,11 @@ import AbbreviationComponent from "../../Editor/plugins/abbreviation/settings/Ab
 export default function PluginsSettings() {
     return (
         <>
-            <h1>Abbreviation</h1>
-            <AbbreviationComponent />
+            <h1>Plugin</h1>
+            <section>
+                <h3>Abbreviation</h3>
+                <AbbreviationComponent />
+            </section>
         </>
     )
 }

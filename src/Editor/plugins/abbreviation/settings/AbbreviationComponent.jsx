@@ -129,7 +129,6 @@ export default function AbbreviationComponent() {
     else return (
         <>
             <AbbreviationCallout errors={errors} />
-
             <form id="abbrev-form">
                 <ul className="block-list">
                     {rows.map((row) => (
@@ -149,6 +148,7 @@ export default function AbbreviationComponent() {
             <button type="button" onClick={() => addRow()} className="abbrev-add">
                 + Ajouter une abréviation
             </button>
+            <DynamicCasing />
         </>
     );
 }
@@ -239,3 +239,26 @@ const AbbreviationRow = React.memo(function AbbreviationRow({
         prevProps.row.error === nextProps.row.error
     );
 });
+
+const DynamicCasing = () => {
+    return (
+        <>
+            <ul className="block-list">
+                <li>
+                    <label htmlFor="dynamic" className="dynamic">
+                        <p>Dynamic casing</p>
+
+                        <span className="switch">
+                            <input type="checkbox" id="dynamic" />
+                            <span className="slider"></span>
+                        </span>
+                    </label>
+                </li>
+            </ul>
+            <p className="abbrev-description">
+                Lorsque activé, la sortie adapte sa casse à celle de l’abréviation saisie
+                et lorsque désactivé la sortie utilise toujours la casse originale de l’abréviation.
+            </p>
+        </>
+    )
+}

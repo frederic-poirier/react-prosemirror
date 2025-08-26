@@ -11,6 +11,7 @@
         border: none;
         display: flex;
         padding: 0.5rem;
+        align-items: center;
 
     }
 
@@ -29,24 +30,22 @@
     input[name='short'] {
         font-family: var(--font-mono);
         max-width: 6ch;
-        color: var(--color-gray-500);
     }
 }
 
 .abbrev-decorator::after {
     content: '→';
-    color: var(--color-gray-500);
+    color: var(--color-gray-300);
     margin-right: 1ch;
 }
 
 button.abbrev-add {
     color: var(--color-gray-500);
-    text-align: left;
     padding-block: 0.5rem;
+    margin-bottom: 1rem;
     border-radius: 0.5rem;
     cursor: pointer;
     font-size: 0.875rem;
-    transition: all 0.2s cubic-bezier(0.19, 1, 0.22, 1);
     background: none;
     border: none;
 }
@@ -72,7 +71,72 @@ button.abbrev-del {
 .abbrev-duplicate {
     background-color: var(--color-gray-200);
     font-family: var(--font-mono);
-    border: 1px solid var(--color-gray-500);
+    border: 1px solid var(--color-gray-300);
     padding: 0rem 0.2rem;
     border-radius: 0.25rem;
+}
+
+.dynamic {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem;
+}
+
+.abbrev-description {
+    font-size: 0.875rem;
+    color: var(--color-gray-500);
+    padding: 0.25rem 1rem;
+}
+
+.switch {
+    --button-width: 2.5em;
+    --button-height: 1.5em;
+    --toggle-diameter: 1.25em;
+    --button-toggle-offset: calc((var(--button-height) - var(--toggle-diameter)) / 2);
+    --toggle-shadow-offset: 10px;
+    --toggle-wider: 2em;
+}
+
+.slider {
+    display: block;
+    width: var(--button-width);
+    height: var(--button-height);
+    background-color: var(--color-gray-200);
+    border-radius: calc(var(--button-height) / 2);
+    position: relative;
+    transition: 0.3s all cubic-bezier(0.075, 0.82, 0.165, 1);
+}
+
+.slider::after {
+    content: "";
+    display: block;
+    width: var(--toggle-diameter);
+    height: var(--toggle-diameter);
+    background-color: #fff;
+    border-radius: calc(var(--toggle-diameter) / 2);
+    position: absolute;
+    top: var(--button-toggle-offset);
+    transform: translateX(var(--button-toggle-offset));
+    transition: 0.3s all cubic-bezier(0.075, 0.82, 0.165, 1);
+}
+
+.switch input[type="checkbox"]:checked+.slider {
+    background-color: var(--color-success-100);
+}
+
+.switch input[type="checkbox"]:checked+.slider::after {
+    transform: translateX(calc(var(--button-width) - var(--toggle-diameter) - var(--button-toggle-offset)));
+}
+
+.switch input[type="checkbox"] {
+    display: none;
+}
+
+.switch input[type="checkbox"]:active+.slider::after {
+    width: var(--toggle-wider);
+}
+
+.switch input[type="checkbox"]:checked:active+.slider::after {
+    transform: translateX(calc(var(--button-width) - var(--toggle-wider) - var(--button-toggle-offset)));
 }
