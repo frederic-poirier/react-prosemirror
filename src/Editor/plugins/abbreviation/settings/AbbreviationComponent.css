@@ -1,0 +1,78 @@
+.block-list {
+
+    button {
+        background: none;
+        border: none;
+        padding: 0;
+    }
+
+
+    fieldset {
+        border: none;
+        display: flex;
+        padding: 0.5rem;
+
+    }
+
+    input {
+        flex: 1;
+        border-radius: 4px;
+        font-size: 1rem;
+        background: none;
+        border: none;
+
+        &:focus {
+            outline: none;
+        }
+    }
+
+    input[name='short'] {
+        font-family: var(--font-mono);
+        max-width: 6ch;
+        color: var(--color-gray-500);
+    }
+}
+
+.abbrev-decorator::after {
+    content: '→';
+    color: var(--color-gray-500);
+    margin-right: 1ch;
+}
+
+button.abbrev-add {
+    color: var(--color-gray-500);
+    text-align: left;
+    padding-block: 0.5rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-size: 0.875rem;
+    transition: all 0.2s cubic-bezier(0.19, 1, 0.22, 1);
+    background: none;
+    border: none;
+}
+
+button.abbrev-del {
+    display: inline-block;
+    color: var(--color-gray-500);
+    cursor: pointer;
+}
+
+:has(> .error) button {
+    color: var(--color-warning-100);
+    cursor: wait;
+    transition: all 0.4s cubic-bezier(0.075, 0.82, 0.165, 1);
+    transition-behavior: allow-discrete;
+
+    @starting-style {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+}
+
+.abbrev-duplicate {
+    background-color: var(--color-gray-200);
+    font-family: var(--font-mono);
+    border: 1px solid var(--color-gray-500);
+    padding: 0rem 0.2rem;
+    border-radius: 0.25rem;
+}

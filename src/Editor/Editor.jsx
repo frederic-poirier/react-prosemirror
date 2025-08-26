@@ -6,9 +6,9 @@ import { history, undo, redo } from "prosemirror-history";
 import { keymap } from "prosemirror-keymap";
 import { baseKeymap } from "prosemirror-commands";
 
-import { pairedCharPlugin } from "./plugins/pairedCharPlugin";
-import { abbreviationPlugin } from "./plugins/abbreviationPlugin";
-import placeholderPlugin from "./plugins/placeholderPlugin";
+import { pairedCharPlugin } from "./plugins/autoclosing/autoclosingPlugin";
+import { abbreviationPlugin } from "./plugins/abbreviation/abbreviationPlugin";
+import placeholderPlugin from "./plugins/placeholder/placeholderPlugin";
 import ProseMirrorDispatcher from './ProseMirroDispatcher'
 
 import './styles/editor.css'

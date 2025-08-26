@@ -1,10 +1,10 @@
 import { Routes, Route } from "react-router-dom";
 import Editor from "./Editor/Editor";
-import Home from "./Home";
-import SettingsLayout from "./settings/SettingsLayout";
-import SettingsHome from "./settings/SettingsHome";
-import AppearanceSettings from "./settings/AppearanceSettings";
-import PluginsSettings from "./settings/PluginsSettings";
+import Home from "./pages/Home";
+import SettingsLayout from "./features/settings/SettingsLayout";
+import SettingsHome from "./features/settings/SettingsHome";
+import AppearanceSettings from "./features/settings/AppearanceSettings";
+import PluginsSettings from "./features/settings/PluginsSettings";
 
 export default function App() {
   return (

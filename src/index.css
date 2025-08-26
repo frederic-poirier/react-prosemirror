@@ -99,6 +99,31 @@ h6 {
   --color-gray-800: oklch(0.279 0 260.031);
   --color-gray-900: oklch(0.208 0 265.755);
   --color-gray-950: oklch(0.129 0 264.695);
+
+  /* Warning (Yellow/Amber) */
+  --color-warning-100: oklch(0.95 0.15 85);
+  --color-warning-200: oklch(0.85 0.18 85);
+  --color-warning-300: oklch(0.75 0.2 85);
+  --color-warning-400: oklch(0.65 0.22 85);
+
+  /* Danger (Red) */
+  --color-danger-100: oklch(0.95 0.25 25);
+  --color-danger-200: oklch(0.85 0.27 25);
+  --color-danger-300: oklch(0.75 0.3 25);
+  --color-danger-400: oklch(0.65 0.32 25);
+
+  /* Info (Blue) */
+  --color-info-100: oklch(0.95 0.15 250);
+  --color-info-200: oklch(0.85 0.18 250);
+  --color-info-300: oklch(0.75 0.2 250);
+  --color-info-400: oklch(0.65 0.22 250);
+
+  /* Success (Green) */
+  --color-success-100: oklch(0.95 0.15 135);
+  --color-success-200: oklch(0.85 0.18 135);
+  --color-success-300: oklch(0.75 0.2 135);
+  --color-success-400: oklch(0.65 0.22 135);
+
 }
 
 @media (prefers-color-scheme: dark) {
@@ -115,6 +140,31 @@ h6 {
     --color-gray-150: oklch(0.23 0 265.152);
     --color-gray-100: oklch(0.208 0 265.755);
     --color-gray-50: oklch(0.129 0 264.695);
+
+    /* Warning */
+    --color-warning-100: oklch(0.75 0.22 85);
+    --color-warning-200: oklch(0.65 0.24 85);
+    --color-warning-300: oklch(0.55 0.26 85);
+    --color-warning-400: oklch(0.45 0.28 85);
+
+    /* Danger */
+    --color-danger-100: oklch(0.75 0.3 25);
+    --color-danger-200: oklch(0.65 0.32 25);
+    --color-danger-300: oklch(0.55 0.34 25);
+    --color-danger-400: oklch(0.45 0.36 25);
+
+    /* Info */
+    --color-info-100: oklch(0.75 0.2 250);
+    --color-info-200: oklch(0.65 0.22 250);
+    --color-info-300: oklch(0.55 0.24 250);
+    --color-info-400: oklch(0.45 0.26 250);
+
+    /* Success */
+    --color-success-100: oklch(0.75 0.2 135);
+    --color-success-200: oklch(0.65 0.22 135);
+    --color-success-300: oklch(0.55 0.24 135);
+    --color-success-400: oklch(0.45 0.26 135);
+
   }
 }
 

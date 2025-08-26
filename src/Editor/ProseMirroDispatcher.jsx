@@ -1,6 +1,6 @@
 import { useRef, useEffect } from 'react';
-import { abbreviationPluginKey } from './plugins/abbreviationPlugin';
-import { useAbbreviations } from '../components/useAbbreviations';
+import { abbreviationPluginKey } from './plugins/abbreviation/abbreviationPlugin';
+import { useAbbreviations } from './plugins/abbreviation/settings/useAbbreviations';
 import { useEditorEffect } from '@handlewithcare/react-prosemirror';
 
 export default function ProseMirrorDispatcher() {
