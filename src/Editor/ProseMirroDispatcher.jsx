@@ -11,7 +11,6 @@ export default function ProseMirrorDispatcher() {
   // Stocke la view
   useEditorEffect((view) => {
     viewRef.current = view;
-    console.log('test', isInitialDispatch, view)
 
     if (view && !isInitialDispatch.current) {
       isInitialDispatch.current = true;

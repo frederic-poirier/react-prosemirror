@@ -1,14 +1,14 @@
-import { Link } from "react-router-dom";
-import { ChevronRight } from "lucide-react";
+import { NavigationList, NavigationListItem } from "../../component/settings";
 
 export default function SettingsHome() {
   return (
     <>
-    <h1>Settings</h1>
-    <ul className="block-list">
-      <li><Link to="appearance">Appearance <ChevronRight /></Link></li>
-      <li><Link to="plugins">Plugins <ChevronRight /></Link></li>
-    </ul>
+      <h1>Settings</h1>
+      <NavigationList>
+        <NavigationListItem link='plugins' />
+        <NavigationListItem link='appearance' />
+      </NavigationList>
+
     </>
   );
 }

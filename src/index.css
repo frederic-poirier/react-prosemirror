@@ -86,6 +86,8 @@ h6 {
 }
 
 :root {
+  color-scheme: light dark;
+
   --font-mono: 'JetBrains Mono', monospace;
   --color-gray-50: oklch(0.984 0 247.858);
   --color-gray-100: oklch(0.968 0 247.896);

@@ -21,29 +21,7 @@
     }
 }
 
-.block-list {
-    list-style: none;
-    padding: 0.5rem;
-    background-color: var(--color-gray-150);
-    border-radius: 1rem;
 
-    li:not(:last-child) {
-        border-bottom: 1px solid var(--color-gray-100);
-    }
-
-
-
-    a {
-        color: inherit;
-        text-decoration: none;
-        text-transform: capitalize;
-        display: flex;
-        justify-content: space-between;
-        padding: 0.5rem;
-        border-radius: 0.5rem;
-    }
-
-}
 
 h1 {
     margin-bottom: 0.5rem;
@@ -110,7 +88,7 @@ section {
         text-transform: uppercase;
         font-weight: 400;
         border-top: 1px solid var(--color-gray-200);
-        padding-block: 1rem;
+        padding-top: 1rem;
         font-size: 0.875rem;
     }
 }

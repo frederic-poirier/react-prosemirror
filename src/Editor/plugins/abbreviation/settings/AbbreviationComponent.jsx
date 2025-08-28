@@ -1,10 +1,11 @@
-import { useState, useMemo, useCallback, useRef } from "react";
+import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import React from "react";
 import { useAbbreviations } from "./useAbbreviations";
 import { X, TriangleAlert } from "lucide-react";
 import './AbbreviationComponent.css'
+import { FormList, Switch, Shortcut } from "../../../../component/settings";
 
-// En dehors du composant
+// --- Helpers ---
 function validateDuplicates(rows) {
     const shortCounts = {};
     rows.forEach(row => {
@@ -20,10 +21,21 @@ function validateDuplicates(rows) {
     });
 }
 
-
 export default function AbbreviationComponent() {
+    return (
+        <>
+            <Trigger />
+            <AbbreviationForm />
+            <DynamicCasing />
+        </>
+    );
+}
+
+// --- Form ---
+const AbbreviationForm = React.memo(function AbbreviationForm() {
     const [abbreviations, setAbbreviations] = useAbbreviations();
     const [rows, setRows] = useState(() => validateDuplicates(initialLoad()));
+    const [errors, setErrors] = useState([]); // errors séparé
     const inputRefs = useRef(new Map());
 
     function initialLoad() {
@@ -34,6 +46,20 @@ export default function AbbreviationComponent() {
             error: null,
         }));
     }
+
+    // Met à jour errors seulement si nécessaire
+    useEffect(() => {
+        const newErrors = [...new Set(rows.filter(r => r.error).map(r => r.short.toLowerCase()))];
+        setErrors(prev => {
+            if (
+                prev.length === newErrors.length &&
+                prev.every((e, i) => e === newErrors[i])
+            ) {
+                return prev; // rien ne change -> pas de rerender du callout
+            }
+            return newErrors;
+        });
+    }, [rows]);
 
     const saveRow = useCallback((rows) => {
         const entries = rows
@@ -66,7 +92,6 @@ export default function AbbreviationComponent() {
             saveRow(validatedRows);
             return validatedRows;
         });
-
         setTimeout(() => focusRow(newId), 0);
         return newId;
     }, [saveRow]);
@@ -95,7 +120,6 @@ export default function AbbreviationComponent() {
 
         if (isShort && fillShort) focusRow(row.id + "-full");
         else if (!isShort && fillShort && fillFull) addRow(row.id);
-
     }, [addRow]);
 
     const handleBackspace = useCallback((e, row) => {
@@ -106,7 +130,7 @@ export default function AbbreviationComponent() {
 
         if (!isShort && noText && selectionEmpty) {
             e.preventDefault();
-            focusRow(row.id); // focus le short correspondant
+            focusRow(row.id);
         } else if (isShort && noText && selectionEmpty && !row.full.trim()) {
             e.preventDefault();
             removeRow(row.id, true);
@@ -116,46 +140,40 @@ export default function AbbreviationComponent() {
     const registerRef = useCallback((id, el) => {
         if (el) inputRefs.current.set(id, el);
         else inputRefs.current.delete(id);
-    }, [])
+    }, []);
 
     function focusRow(id) {
         const el = inputRefs.current.get(id);
         if (el) el.focus();
     }
 
-    const errors = useMemo(() => [...new Set(rows.filter(r => r.error).map(r => r.short.toLowerCase()))], [rows]);
-
     if (rows.length === 0) return <div>Loading abbreviations...</div>;
     else return (
         <>
             <AbbreviationCallout errors={errors} />
-            <form id="abbrev-form">
-                <ul className="block-list">
-                    {rows.map((row) => (
-                        <AbbreviationRow
-                            key={row.id}
-                            row={row}
-                            updateRow={updateRow}
-                            removeRow={removeRow}
-                            handleEnter={handleEnter}
-                            handleBackspace={handleBackspace}
-                            registerRef={registerRef}
-                        />
-                    ))}
-                </ul>
-            </form>
-
+            <FormList>
+                {rows.map((row) => (
+                    <AbbreviationRow
+                        key={row.id}
+                        row={row}
+                        updateRow={updateRow}
+                        removeRow={removeRow}
+                        handleEnter={handleEnter}
+                        handleBackspace={handleBackspace}
+                        registerRef={registerRef}
+                    />
+                ))}
+            </FormList>
             <button type="button" onClick={() => addRow()} className="abbrev-add">
                 + Ajouter une abréviation
             </button>
-            <DynamicCasing />
         </>
     );
-}
+});
 
+// --- Callout ---
 const AbbreviationCallout = React.memo(function AbbreviationCallout({ errors }) {
     return (
-
         <div className={`callout warning ${errors.length > 0 ? 'visible' : ''}`}>
             <TriangleAlert />
             <h3>Attention</h3>
@@ -173,12 +191,14 @@ const AbbreviationCallout = React.memo(function AbbreviationCallout({ errors }) 
                 }
                 Veuillez modifier l’une des occurrences pour éviter les doublons.
             </p>
-
-
         </div>
-    )
-})
+    );
+}, (prev, next) => {
+    if (prev.errors.length !== next.errors.length) return false;
+    return prev.errors.every((e, i) => e === next.errors[i]);
+});
 
+// --- Row ---
 const AbbreviationRow = React.memo(function AbbreviationRow({
     row,
     updateRow,
@@ -191,74 +211,75 @@ const AbbreviationRow = React.memo(function AbbreviationRow({
     const DangerIcon = useMemo(() => <TriangleAlert />, []);
 
     return (
-        <li>
-            <fieldset>
-                <input
-                    ref={el => registerRef(row.id, el)}
-                    id={row.id}
-                    type="text"
-                    name="short"
-                    value={row.short}
-                    onChange={e => updateRow(row.id, "short", e.target.value)}
-                    onKeyDown={e => {
-                        if (e.key === "Enter") handleEnter(e, row);
-                        if (e.key === "Backspace") handleBackspace(e, row);
-                    }}
-                    placeholder="Abbr"
-                    maxLength={4}
-                    size={4}
-                    autoComplete="off"
-                    className={row.error === 'duplicate' ? 'error' : ''}
-                />
-                <span className="abbrev-decorator"></span>
-                <input
-                    ref={el => registerRef(row.id + "-full", el)}
-                    id={row.id + "-full"}
-                    type="text"
-                    name="full"
-                    value={row.full}
-                    onChange={e => updateRow(row.id, "full", e.target.value)}
-                    onKeyDown={e => {
-                        if (e.key === "Enter") handleEnter(e, row);
-                        if (e.key === "Backspace") handleBackspace(e, row);
-                    }}
-                    placeholder="Full term"
-                    autoComplete="off"
-                />
-                <button type="button" className="abbrev-del" disabled={row.error} onClick={() => removeRow(row.id)}>
-                    {row.error ? DangerIcon : DeleteIcon}
-                </button>
-            </fieldset>
-        </li>
+        <fieldset>
+            <input
+                ref={el => registerRef(row.id, el)}
+                id={row.id}
+                type="text"
+                name="short"
+                value={row.short}
+                onChange={e => updateRow(row.id, "short", e.target.value)}
+                onKeyDown={e => {
+                    if (e.key === "Enter") handleEnter(e, row);
+                    if (e.key === "Backspace") handleBackspace(e, row);
+                }}
+                placeholder="Abbr"
+                maxLength={4}
+                size={4}
+                autoComplete="off"
+                className={row.error === 'duplicate' ? 'error' : ''}
+            />
+            <span className="abbrev-decorator"></span>
+            <input
+                ref={el => registerRef(row.id + "-full", el)}
+                id={row.id + "-full"}
+                type="text"
+                name="full"
+                value={row.full}
+                onChange={e => updateRow(row.id, "full", e.target.value)}
+                onKeyDown={e => {
+                    if (e.key === "Enter") handleEnter(e, row);
+                    if (e.key === "Backspace") handleBackspace(e, row);
+                }}
+                placeholder="Full term"
+                autoComplete="off"
+            />
+            <button
+                type="button"
+                className="abbrev-del"
+                disabled={row.error}
+                onClick={() => removeRow(row.id)}
+            >
+                {row.error ? DangerIcon : DeleteIcon}
+            </button>
+        </fieldset>
     );
-}, (prevProps, nextProps) => {
-    // Ne rerender que si les props qui nous intéressent changent
-    return (
-        prevProps.row.short === nextProps.row.short &&
-        prevProps.row.full === nextProps.row.full &&
-        prevProps.row.error === nextProps.row.error
-    );
-});
+}, (prevProps, nextProps) => (
+    prevProps.row.short === nextProps.row.short &&
+    prevProps.row.full === nextProps.row.full &&
+    prevProps.row.error === nextProps.row.error
+));
 
-const DynamicCasing = () => {
+// --- Dynamic casing ---
+const DynamicCasing = React.memo(function () {
     return (
         <>
-            <ul className="block-list">
-                <li>
-                    <label htmlFor="dynamic" className="dynamic">
-                        <p>Dynamic casing</p>
-
-                        <span className="switch">
-                            <input type="checkbox" id="dynamic" />
-                            <span className="slider"></span>
-                        </span>
-                    </label>
-                </li>
-            </ul>
+            <FormList defaultValues={{ dynamicCasing: false }}>
+                <Switch label='Dynamic casing' settingKey='dynamicCasing'/>
+            </FormList>
             <p className="abbrev-description">
-                Lorsque activé, la sortie adapte sa casse à celle de l’abréviation saisie
+                Lorsque activé, la sortie adapte sa casse à celle de l’abréviation saisie.
                 et lorsque désactivé la sortie utilise toujours la casse originale de l’abréviation.
             </p>
         </>
+    );
+});
+
+const Trigger = React.memo(function () {
+    return (
+        <FormList defaultValues={{ preventTriggerModification: false, shortcutTrigger: [' '] }}>
+            <Switch label='Prevent trigger' settingKey='preventTriggerModification' />
+            <Shortcut label='Define shorcut' settingKey='shortcutTrigger' maxLength={1} />
+        </FormList>
     )
-}
+})

@@ -1,0 +1,125 @@
+.block-list {
+    list-style: none;
+    padding: 0.5rem;
+    background-color: var(--color-gray-150);
+    border-radius: 1rem;
+    margin-top: 1rem;
+
+    >* {
+        padding: 0.5rem;
+        text-transform: capitalize;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+
+
+    >*:not(:last-child) {
+        border-bottom: 1px solid var(--color-gray-100);
+    }
+
+    a {
+        color: inherit;
+        text-decoration: none;
+        display: flex;
+        justify-content: space-between;
+    }
+}
+
+button,
+input {
+    background: none;
+    border: none;
+    padding: 0;
+    border-radius: 0.25rem;
+    font-size: 1rem;
+
+
+    &:focus-visible {
+        outline: 2px solid var(--color-gray-700);
+    }
+}
+
+.shortcut {
+    display: flex;
+
+
+
+
+    kbd,
+    span {
+        display: flex;
+        align-items: center;
+        text-transform: uppercase;
+        font-family: var(--font-mono);
+        padding-inline: 0.25rem;
+        color: var(--color-gray-500);
+    }
+}
+
+.shortcut button svg {
+    height: 1rem;
+    color: var(--color-gray-500);
+    transition: all 3 cubic-bezier(0.075, 0.82, 0.165, 1);
+    transition-behavior: allow-discrete;
+
+    @starting-style {
+
+        transform: scale(0.2);
+        opacity: 0;
+    }
+}
+
+
+.switch {
+    --button-width: 2.5em;
+    --button-height: 1.5em;
+    --toggle-diameter: 1.25em;
+    --button-toggle-offset: calc((var(--button-height) - var(--toggle-diameter)) / 2);
+    --toggle-shadow-offset: 10px;
+    --toggle-wider: 2em;
+}
+
+.slider {
+    display: block;
+    width: var(--button-width);
+    height: var(--button-height);
+    background-color: var(--color-gray-100);
+    border-radius: calc(var(--button-height) / 2);
+    position: relative;
+    transition: 0.1s all cubic-bezier(0.075, 0.82, 0.165, 1);
+}
+
+.slider::after {
+    content: "";
+    display: block;
+    width: var(--toggle-diameter);
+    height: var(--toggle-diameter);
+    background-color: white;
+    border-radius: calc(var(--toggle-diameter) / 2);
+    position: absolute;
+    top: var(--button-toggle-offset);
+    transform: translateX(var(--button-toggle-offset));
+    transition: 0.1s all cubic-bezier(0.075, 0.82, 0.165, 1);
+}
+
+.switch input[type="checkbox"]:checked+.slider {
+    background-color: var(--color-gray-500);
+}
+
+.switch input[type="checkbox"]:checked+.slider::after {
+    transform: translateX(calc(var(--button-width) - var(--toggle-diameter) - var(--button-toggle-offset)));
+}
+
+.switch input[type="checkbox"] {
+    display: none;
+}
+
+.switch input[type="checkbox"]:active+.slider::after {
+    width: var(--toggle-wider);
+}
+
+.switch input[type="checkbox"]:checked:active+.slider::after {
+    transform: translateX(calc(var(--button-width) - var(--toggle-wider) - var(--button-toggle-offset)));
+}

@@ -1,6 +1,6 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
 import { ChevronRight, House } from 'lucide-react';
-import './Settings.css'
+import './SettingsLayout.css'
 
 export default function SettingsLayout() {
     return (
