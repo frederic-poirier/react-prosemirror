@@ -6,34 +6,68 @@ export const abbreviationPlugin = new Plugin({
   key: abbreviationPluginKey,
   state: {
     init() {
-      return new Map(); // plugin state = Map
+      return {
+        abbreviations: new Map(), // Map pour lookup rapide
+        dynamicCasing: true,
+        preventTrigger: true,
+      };
     },
+
     apply(tr, value) {
       const meta = tr.getMeta(abbreviationPluginKey);
-      if (meta?.type === "update" && Array.isArray(meta.abbreviations)) {
+
+      if (meta?.type === "update") {
+        const data = meta.data || {};
         const map = new Map();
-        for (const entry of meta.abbreviations) {
-          if (!entry.short) continue;
-          map.set(entry.short.toLowerCase(), entry);
+
+        if (Array.isArray(data.abbreviations)) {
+          for (const entry of data.abbreviations) {
+            if (!entry.short) continue;
+            map.set(entry.short.toLowerCase(), entry);
+          }
         }
-        return map;
+
+        return {
+          ...value,
+          abbreviations: map,
+          dynamicCasing: data.dynamicCasing ?? value.dynamicCasing,
+          preventTrigger: data.preventTrigger ?? value.preventTrigger,
+        };
       }
+
       return value;
     },
   },
+
   props: {
     handleKeyDown(view, event) {
       const key = event.key;
       const pluginState = abbreviationPluginKey.getState(view.state);
-      if (key === " " && pluginState && pluginState.size > 0) {
-        return abbreviate(event, view.dispatch, view.state, pluginState);
+
+      if (!pluginState) return false;
+
+      const abbrevMap = pluginState.abbreviations;
+      const { dynamicCasing, preventTrigger } = pluginState;
+
+      // Exemple : espace déclenche l'abbreviation si preventTrigger activé
+      if (key === " " && abbrevMap && abbrevMap.size > 0) {
+        return abbreviate(
+          event,
+          view.dispatch,
+          view.state,
+          abbrevMap,
+          dynamicCasing,
+          preventTrigger
+        );
       }
+
       return false;
     },
   },
 });
 
-function abbreviate(event, dispatch, state, abbrevMap) {
+// Fonction de remplacement des abréviations
+function abbreviate(event, dispatch, state, abbrevMap, dynamicCasing) {
   const { $from } = state.selection;
   const textBefore = $from.parent.textBetween(0, $from.parentOffset);
   const lastWord = textBefore.split(/\s+/).pop();
@@ -44,21 +78,18 @@ function abbreviate(event, dispatch, state, abbrevMap) {
   if (!entry) return false;
 
   let replacement = entry.full;
-  let shouldReplace = true;
 
-  if (entry.caseMatching) {
-    // Vérifie si la casse doit correspondre strictement
-    const exactEntry = abbrevMap.get(lastWord);
-    if (exactEntry) replacement = exactEntry.full;
-    else shouldReplace = false;
+  if (dynamicCasing) {
+    // Adapte la casse à la saisie de l'utilisateur
+    if (lastWord === lastWord.toUpperCase())
+      replacement = replacement.toUpperCase();
+    else if (lastWord[0] === lastWord[0].toUpperCase())
+      replacement = replacement[0].toUpperCase() + replacement.slice(1);
   }
 
-  if (shouldReplace) {
-    event.preventDefault();
-    const from = $from.pos - lastWord.length;
-    dispatch(state.tr.insertText(replacement + " ", from, $from.pos));
-    return true;
-  }
+  event.preventDefault();
+  const from = $from.pos - lastWord.length;
+  dispatch(state.tr.insertText(replacement + " ", from, $from.pos));
 
-  return false;
+  return true;
 }

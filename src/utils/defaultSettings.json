@@ -1,0 +1,13 @@
+{
+  "abbreviationPlugin": {
+    "abbreviations": [
+      { "short": "js", "full": "JavaScript" },
+      { "short": "css", "full": "Cascading Style Sheets" },
+      { "short": "py", "full": "Python" },
+      { "short": "html", "full": "Hypertext Markup Language" },
+      { "short": "abvr", "full": "Abréviation" }
+    ],
+    "dynamicCasing": true,
+    "preventTrigger": true
+  }
+}

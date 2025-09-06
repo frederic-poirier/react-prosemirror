@@ -23,6 +23,7 @@
         color: inherit;
         text-decoration: none;
         display: flex;
+        width: 100%;
         justify-content: space-between;
     }
 }
@@ -38,36 +39,6 @@ input {
 
     &:focus-visible {
         outline: 2px solid var(--color-gray-700);
-    }
-}
-
-.shortcut {
-    display: flex;
-
-
-
-
-    kbd,
-    span {
-        display: flex;
-        align-items: center;
-        text-transform: uppercase;
-        font-family: var(--font-mono);
-        padding-inline: 0.25rem;
-        color: var(--color-gray-500);
-    }
-}
-
-.shortcut button svg {
-    height: 1rem;
-    color: var(--color-gray-500);
-    transition: all 3 cubic-bezier(0.075, 0.82, 0.165, 1);
-    transition-behavior: allow-discrete;
-
-    @starting-style {
-
-        transform: scale(0.2);
-        opacity: 0;
     }
 }
 
@@ -113,7 +84,12 @@ input {
 }
 
 .switch input[type="checkbox"] {
-    display: none;
+    appearance: none;
+    position: absolute;
+
+    &:focus {
+        outline: none;
+    }
 }
 
 .switch input[type="checkbox"]:active+.slider::after {
@@ -122,4 +98,69 @@ input {
 
 .switch input[type="checkbox"]:checked:active+.slider::after {
     transform: translateX(calc(var(--button-width) - var(--toggle-wider) - var(--button-toggle-offset)));
+}
+
+.switch:has(input:focus-visible) .slider {
+    outline: 2px solid var(--color-gray-700);
+}
+
+.table-settings {
+    --radius: 1rem;
+
+    margin-block: 1rem;
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--radius);
+
+    header {
+        background-color: var(--color-gray-150);
+        display: grid;
+        grid-template-columns: 20% 1fr;
+        padding: 1rem;
+        border-top-left-radius: var(--radius);
+        border-top-right-radius: var(--radius);
+
+        h4 {
+            font-weight: 400;
+        }
+    }
+
+    fieldset {
+        display: grid;
+        grid-template-columns: 20% 1fr;
+        border: none;
+        padding: 0;
+
+        label:not(:first-of-type) {
+            border-left: 1px solid var(--color-gray-150);
+        }
+
+        &:not(:last-of-type) {
+            border-bottom: 1px solid var(--color-gray-150);
+        }
+    }
+
+
+    fieldset:last-of-type {
+        label:last-of-type input {
+            border-bottom-right-radius: 1rem;
+        }
+
+        label:first-of-type input {
+            border-bottom-left-radius: 1rem;
+        }
+    }           
+
+    label {
+        font-size: 0;
+
+        input {
+            font-size: 1rem;
+            padding: 0.75rem 1rem;
+            width: 100%;
+        }
+    }
+}
+
+.short {
+    font-family: var(--font-mono);
 }

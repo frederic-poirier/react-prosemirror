@@ -1,38 +1,58 @@
-import { useRef, useEffect } from 'react';
-import { abbreviationPluginKey } from './plugins/abbreviation/abbreviationPlugin';
-import { useAbbreviations } from './plugins/abbreviation/settings/useAbbreviations';
-import { useEditorEffect } from '@handlewithcare/react-prosemirror';
+import { useEffect, useRef } from "react";
+import { useSettings } from "../utils/useSettings";
+import { useEditorEffect } from "@handlewithcare/react-prosemirror";
+import { abbreviationPluginKey } from './plugins/abbreviation/abbreviationPlugin'
+
+// Liste des plugins et le chemin dans settings
+const pluginMap = [
+  { pluginKey: abbreviationPluginKey, path: "abbreviationPlugin" },
+  { pluginKey: "anotherPluginKey", path: "anotherPlugin" },
+  // ajouter ici d’autres plugins
+];
 
 export default function ProseMirrorDispatcher() {
-  const [abbreviations] = useAbbreviations(); // hook, pas de set ici
+  const [_, getSetting] = useSettings();
   const viewRef = useRef(null);
-  const isInitialDispatch = useRef(false);
+  const initialDispatchDone = useRef(false);
 
   // Stocke la view
   useEditorEffect((view) => {
     viewRef.current = view;
+    if (view && !initialDispatchDone.current) {
+      initialDispatchDone.current = true;
 
-    if (view && !isInitialDispatch.current) {
-      isInitialDispatch.current = true;
-      const tr = view.state.tr.setMeta(abbreviationPluginKey, {
-        type: 'update',
-        abbreviations,
+      // Initial dispatch
+      pluginMap.forEach(({ pluginKey, path }) => {
+        const data = getSetting(path);
+        console.log(data)
+        if (data && view) {
+          const tr = view.state.tr.setMeta(pluginKey, {
+            type: "update",
+            data,
+          });
+          view.dispatch(tr);
+        }
       });
-      view.dispatch(tr);
     }
   });
 
-  // Dispatch sur changements ultérieurs
+  // Dispatch à chaque changement
   useEffect(() => {
-    if (!viewRef.current) return;
-    if (!isInitialDispatch.current) return; // attendre que l'initial dispatch soit fait
+    if (!viewRef.current || !initialDispatchDone.current) return;
 
-    const tr = viewRef.current.state.tr.setMeta(abbreviationPluginKey, {
-      type: 'update',
-      abbreviations,
+    pluginMap.forEach(({ pluginKey, path }) => {
+      const data = getSetting(path);
+      console.log(data)
+      if (!data) return;
+
+      const tr = viewRef.current.state.tr.setMeta(pluginKey, {
+        type: "update",
+        data,
+      });
+      viewRef.current.dispatch(tr);
     });
-    viewRef.current.dispatch(tr);
-  }, [abbreviations]);
+  }, [getSetting]); // getSetting est stable via useCallback
+  // Si besoin, tu peux optimiser avec useMemo pour ne dispatcher que si data change
 
   return null;
 }
