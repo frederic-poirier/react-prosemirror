@@ -5,10 +5,11 @@ import SettingsLayout from "./features/settings/SettingsLayout";
 import SettingsHome from "./features/settings/SettingsHome";
 import AppearanceSettings from "./features/settings/AppearanceSettings";
 import PluginsSettings from "./features/settings/PluginsSettings";
+import HotkeysSettings from './features/settings/HotkeysSettings'
 
 export default function App() {
   return (
-    
+
     <Routes>
       {/* Page d'accueil */}
       <Route path="/" element={<Home />} />
@@ -21,6 +22,8 @@ export default function App() {
         <Route index element={<SettingsHome />} />
         <Route path="appearance" element={<AppearanceSettings />} />
         <Route path="plugins" element={<PluginsSettings />} />
+        <Route path="hotkeys" element={<HotkeysSettings />} />
+
       </Route>
     </Routes>
   );

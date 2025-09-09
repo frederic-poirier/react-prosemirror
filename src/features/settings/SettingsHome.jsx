@@ -7,6 +7,7 @@ export default function SettingsHome() {
       <NavigationList>
         <NavigationListItem link='plugins' />
         <NavigationListItem link='appearance' />
+        <NavigationListItem link='hotkeys' />
       </NavigationList>
 
     </>

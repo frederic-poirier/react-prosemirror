@@ -1,4 +1,5 @@
 {
+  "version": 0.1,
   "abbreviationPlugin": {
     "abbreviations": [
       { "short": "js", "full": "JavaScript" },
@@ -8,6 +9,8 @@
       { "short": "abvr", "full": "Abréviation" }
     ],
     "dynamicCasing": true,
-    "preventTrigger": true
+    "preventTrigger": true,
+    "addSpace": true,
+    "caseMatching": true
   }
 }

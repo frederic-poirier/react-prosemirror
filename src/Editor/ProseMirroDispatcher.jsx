@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useSettings } from "../utils/useSettings";
 import { useEditorEffect } from "@handlewithcare/react-prosemirror";
-import { abbreviationPluginKey } from './plugins/abbreviation/abbreviationPlugin'
+import { abbreviationPluginKey } from './plugins/abbreviationPlugin'
 
 // Liste des plugins et le chemin dans settings
 const pluginMap = [

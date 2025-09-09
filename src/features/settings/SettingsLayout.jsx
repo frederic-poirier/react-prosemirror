@@ -4,15 +4,15 @@ import './SettingsLayout.css'
 
 export default function SettingsLayout() {
     return (
-        <div className="settings-layout">
-            <header className="settings-header">
+        <>
+            <header className="settings-header ui-width">
                 <Breadcrumbs />
             </header>
 
-            <main className="settings-main">
+            <main className="settings-main ui-width">
                 <Outlet />
             </main>
-        </div>
+        </>
     );
 }
 

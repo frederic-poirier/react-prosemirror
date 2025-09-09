@@ -31,7 +31,7 @@ export function FormList({ children }) {
     );
 }
 
-export function Switch({ label, path }) {
+export function Switch({ label, path, description }) {
     const [setSetting, getSetting] = useSettings();
     const value = getSetting(path)
     const id = useMemo(() => crypto.randomUUID(), [])
@@ -49,16 +49,21 @@ export function Switch({ label, path }) {
                 />
                 <span className="slider"></span>
             </span>
+            {description && <p className="description">{description}</p>}
         </label>
     )
 }
 
-export function Table({ headers, path }) {
+export function Table({ headers, path, grid }) {
     const [setSetting, getSetting] = useSettings();
     const rows = getSetting(path) || [];
 
     const fieldsetRefs = useRef([]);
     const pendingFocusRef = useRef(null);
+
+    const gridStyle = {
+        gridTemplateColumns: grid ? grid : `repeat(${headers.length}, 1fr)` // ou `repeat(${columns}, 1fr)`
+    }
 
     const handleChange = (rowIndex, key, value) => {
         const updatedRows = [...rows];
@@ -150,13 +155,14 @@ export function Table({ headers, path }) {
 
     return (
         <form className="table-settings">
-            <header>
+            <header style={gridStyle}>
                 {headers.map((h) => <h4 key={h}>{h}</h4>)}
             </header>
             {rows.map((row, rowIndex) => {
                 const keys = Object.keys(row);
                 return (
                     <fieldset
+                        style={gridStyle}
                         key={rowIndex}
                         ref={el => (fieldsetRefs.current[rowIndex] = el)}
                     >

@@ -11,18 +11,20 @@ export default function Home() {
 
     return (
         <>
-            <header className="home-header">
-                <FileText />
-                <Link to="/settings"> <Settings /></Link>
+            <header>
+                <nav className="home-header ui-width">
+                    <FileText />
+                    <Link to="/settings"> <Settings /></Link>
+                </nav>
             </header>
-            <main className="home">
+            <main className="home ui-width">
                 <h1>Notes récentes</h1>
                 <ul className="home-notes">
                     {notes.map((note) => (
                         <li key={note.id}>
                             <Link to={`/notes/${note.id}`}>
-                            <span>Last update: {note.time}</span>
-                            {note.title}
+                                <span>Last update: {note.time}</span>
+                                {note.title}
                             </Link>
                         </li>
                     ))}

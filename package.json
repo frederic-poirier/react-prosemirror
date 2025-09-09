@@ -11,7 +11,8 @@
   },
   "dependencies": {
     "@babel/parser": "^7.28.3",
-    "@handlewithcare/react-prosemirror": "^2.4.11",
+    "@handlewithcare/react-prosemirror": "^2.4.3",
+    "fast-equals": "^5.2.2",
     "lucide-react": "^0.540.0",
     "prosemirror-commands": "^1.7.1",
     "prosemirror-history": "^1.4.1",

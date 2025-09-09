@@ -52,7 +52,7 @@
 .home-header {
     display: flex;
     justify-content: space-between;
-    padding: 1rem;
+    padding-block: 1rem;
 
     a {
         color: inherit;

@@ -75,18 +75,10 @@ h6 {
 }
 
 :root {
+  color-scheme: light dark;
   font-family: Inter, sans-serif;
   font-feature-settings: "liga" 1, "calt" 1;
-}
-
-@supports (font-variation-settings: normal) {
-  :root {
-    font-family: InterVariable, sans-serif;
-  }
-}
-
-:root {
-  color-scheme: light dark;
+  background-color: var(--color-gray-100);
 
   --font-mono: 'JetBrains Mono', monospace;
   --color-gray-50: oklch(0.984 0 247.858);
@@ -170,7 +162,16 @@ h6 {
   }
 }
 
-main {
+.full-width {
+  width: 100%;
+}
+
+.text-width {
+  width: min(60ch, calc(100% - 2rem));
+  margin-inline: auto;
+}
+
+.ui-width {
   width: min(45rem, calc(100% - 2rem));
-  margin: 2rem auto;
+  margin-inline: auto;
 }

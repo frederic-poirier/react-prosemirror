@@ -83,6 +83,8 @@ function abbreviate(event, dispatch, state, abbrevMap, dynamicCasing) {
     // Adapte la casse à la saisie de l'utilisateur
     if (lastWord === lastWord.toUpperCase())
       replacement = replacement.toUpperCase();
+    else if (lastWord === lastWord.toLowerCase())
+      replacement = replacement.toLowerCase();
     else if (lastWord[0] === lastWord[0].toUpperCase())
       replacement = replacement[0].toUpperCase() + replacement.slice(1);
   }
