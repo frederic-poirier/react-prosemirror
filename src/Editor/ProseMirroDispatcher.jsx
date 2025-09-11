@@ -18,19 +18,20 @@ export default function ProseMirrorDispatcher() {
   // Stocke la view
   useEditorEffect((view) => {
     viewRef.current = view;
+
     if (view && !initialDispatchDone.current) {
       initialDispatchDone.current = true;
 
-      // Initial dispatch
       pluginMap.forEach(({ pluginKey, path }) => {
         const data = getSetting(path);
-        console.log(data)
-        if (data && view) {
-          const tr = view.state.tr.setMeta(pluginKey, {
-            type: "update",
-            data,
+        if (data) {
+          queueMicrotask(() => {  // <-- décalage ici
+            const tr = view.state.tr.setMeta(pluginKey, {
+              type: "update",
+              data,
+            });
+            view.dispatch(tr);
           });
-          view.dispatch(tr);
         }
       });
     }
@@ -42,17 +43,17 @@ export default function ProseMirrorDispatcher() {
 
     pluginMap.forEach(({ pluginKey, path }) => {
       const data = getSetting(path);
-      console.log(data)
       if (!data) return;
 
-      const tr = viewRef.current.state.tr.setMeta(pluginKey, {
-        type: "update",
-        data,
+      queueMicrotask(() => {
+        const tr = viewRef.current.state.tr.setMeta(pluginKey, {
+          type: "update",
+          data,
+        });
+        viewRef.current.dispatch(tr);
       });
-      viewRef.current.dispatch(tr);
     });
-  }, [getSetting]); // getSetting est stable via useCallback
-  // Si besoin, tu peux optimiser avec useMemo pour ne dispatcher que si data change
+  }, [getSetting]);
 
   return null;
 }

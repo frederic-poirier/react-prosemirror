@@ -8,24 +8,24 @@ export default function PluginsSettings() {
                 <h3>Abbreviation</h3>
                 <FormList>
                     <Switch
-                        label="Match abbreviation casing"
+                        label="Match abbreviation case"
                         path="abbreviationPlugin.dynamicCasing"
-                        description="Abbreviations will keep the same casing as the original text (e.g., ALL CAPS, lowercase, or mixed case)."
+                        description="Abbreviation keeps original text case."
                     />
                     <Switch
-                        label="Match case when expanding"
+                        label="Match case on expand"
                         path="abbreviationPlugin.caseMatching"
-                        description="Expanded text will match the case of the abbreviation."
+                        description="Expanded text matches abbreviation case."
                     />
                     <Switch
-                        label="Insert space after abbreviation"
+                        label="Add space after abbreviation"
                         path="abbreviationPlugin.addSpace"
-                        description="Automatically adds a space after the abbreviation when expanding."
+                        description="Automatically adds space after expanding."
                     />
                 </FormList>
                 <Table
-                    headers={["Abrv", "Abbreviation"]}
-                    grid="20% auto"
+                    headers={["Abbreviation", "Full form"]}
+                    grid="30% auto"
                     path="abbreviationPlugin.abbreviations"
                 />
             </section>

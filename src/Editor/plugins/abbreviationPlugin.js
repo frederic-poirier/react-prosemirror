@@ -23,7 +23,12 @@ export const abbreviationPlugin = new Plugin({
         if (Array.isArray(data.abbreviations)) {
           for (const entry of data.abbreviations) {
             if (!entry.short) continue;
-            map.set(entry.short.toLowerCase(), entry);
+
+            const key = data.caseMatching
+              ? entry.short
+              : entry.short.toLowerCase(); // <-- mettre en minuscule si caseMatching est falsy
+
+            map.set(key, entry);
           }
         }
 
@@ -31,7 +36,8 @@ export const abbreviationPlugin = new Plugin({
           ...value,
           abbreviations: map,
           dynamicCasing: data.dynamicCasing ?? value.dynamicCasing,
-          preventTrigger: data.preventTrigger ?? value.preventTrigger,
+          addSpace: data.addSpace ?? value.addSpace,
+          caseMatching: data.caseMatching ?? value.caseMatching,
         };
       }
 
@@ -47,7 +53,8 @@ export const abbreviationPlugin = new Plugin({
       if (!pluginState) return false;
 
       const abbrevMap = pluginState.abbreviations;
-      const { dynamicCasing, preventTrigger } = pluginState;
+
+      const { dynamicCasing, addSpace, caseMatching } = pluginState;
 
       // Exemple : espace déclenche l'abbreviation si preventTrigger activé
       if (key === " " && abbrevMap && abbrevMap.size > 0) {
@@ -57,7 +64,8 @@ export const abbreviationPlugin = new Plugin({
           view.state,
           abbrevMap,
           dynamicCasing,
-          preventTrigger
+          addSpace,
+          caseMatching
         );
       }
 
@@ -67,14 +75,23 @@ export const abbreviationPlugin = new Plugin({
 });
 
 // Fonction de remplacement des abréviations
-function abbreviate(event, dispatch, state, abbrevMap, dynamicCasing) {
+function abbreviate(
+  event,
+  dispatch,
+  state,
+  abbrevMap,
+  dynamicCasing,
+  addSpace,
+  caseMatching
+) {
   const { $from } = state.selection;
   const textBefore = $from.parent.textBetween(0, $from.parentOffset);
   const lastWord = textBefore.split(/\s+/).pop();
   if (!lastWord) return false;
 
-  const lowerWord = lastWord.toLowerCase();
-  const entry = abbrevMap.get(lowerWord);
+  const word = caseMatching ? lastWord : lastWord.toLowerCase();
+  const entry = abbrevMap.get(word);
+
   if (!entry) return false;
 
   let replacement = entry.full;
@@ -89,9 +106,11 @@ function abbreviate(event, dispatch, state, abbrevMap, dynamicCasing) {
       replacement = replacement[0].toUpperCase() + replacement.slice(1);
   }
 
+  let space = addSpace ? " " : "";
+
   event.preventDefault();
   const from = $from.pos - lastWord.length;
-  dispatch(state.tr.insertText(replacement + " ", from, $from.pos));
+  dispatch(state.tr.insertText(replacement + space, from, $from.pos));
 
   return true;
 }

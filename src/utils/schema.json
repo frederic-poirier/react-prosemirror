@@ -1,0 +1,23 @@
+{
+  "type": "object",
+  "properties": {
+    "abbreviationPlugin": {
+      "type": "object",
+      "properties": {
+        "abbreviations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "short": { "type": "string", "maxLength": 4 },
+              "full": { "type": "string" }
+            }
+          }
+        },
+        "dynamicCasing": { "type": "boolean" },
+        "addSpace": { "type": "boolean" },
+        "caseMatching": { "type": "boolean" }
+      }
+    }
+  }
+}

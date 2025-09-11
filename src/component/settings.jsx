@@ -54,10 +54,9 @@ export function Switch({ label, path, description }) {
     )
 }
 
-export function Table({ headers, path, grid }) {
-    const [setSetting, getSetting] = useSettings();
+export function Table({ headers, path, grid, description }) {
+    const [setSetting, getSetting, _, getSchema] = useSettings();
     const rows = getSetting(path) || [];
-
     const fieldsetRefs = useRef([]);
     const pendingFocusRef = useRef(null);
 
@@ -143,17 +142,19 @@ export function Table({ headers, path, grid }) {
             const currentValue = inputs[inputIndex].value;
             // Correction du bug : vérifier si le champ est vide
             if (currentValue !== "") return;
+            e.preventDefault()
 
             const allEmpty = inputs.every(i => i.value === "");
-            if (allEmpty) {
-                removeRow(rowIndex);
-            } else if (inputIndex !== 0) {
+            if (inputIndex !== 0) {
                 inputs[inputIndex - 1].focus();
+            } else if (allEmpty) {
+                removeRow(rowIndex);
             }
         }
     };
 
     return (
+        <>
         <form className="table-settings">
             <header style={gridStyle}>
                 {headers.map((h) => <h4 key={h}>{h}</h4>)}
@@ -166,22 +167,44 @@ export function Table({ headers, path, grid }) {
                         key={rowIndex}
                         ref={el => (fieldsetRefs.current[rowIndex] = el)}
                     >
-                        {keys.map((key, inputIndex) => (
-                            <label key={key + "-" + rowIndex} className={key}>
-                                {key}
-                                <input
-                                    id={key + "-" + rowIndex}
-                                    placeholder={headers[inputIndex]}
-                                    type="text"
-                                    value={row[key]}
-                                    onChange={e => handleChange(rowIndex, key, e.target.value)}
-                                    onKeyDown={e => handleKeyDown(e, rowIndex, inputIndex)}
-                                />
-                            </label>
-                        ))}
+                        {keys.map((key, inputIndex) => {
+                            const fieldSchema = getSchema(path)?.items?.properties?.[key] || {};
+                            const inputProps = {};
+                            const validInputProps = [
+                                "maxLength",
+                                "minLength",
+                                "pattern",
+                                "required",
+                                "max",
+                                "min",
+                                "step",
+                            ];
+
+                            validInputProps.forEach(attr => {
+                                if (fieldSchema[attr] !== undefined) {
+                                    inputProps[attr] = fieldSchema[attr];
+                                }
+                            });
+                            return (
+                                <label key={key + "-" + rowIndex} className={key}>
+                                    {key}
+                                    <input
+                                        id={key + "-" + rowIndex}
+                                        placeholder={headers[inputIndex]}
+                                        type="text"
+                                        value={row[key]}
+                                        onChange={e => handleChange(rowIndex, key, e.target.value)}
+                                        onKeyDown={e => handleKeyDown(e, rowIndex, inputIndex)}
+                                        {...inputProps}
+                                    />
+                                </label>
+                            )
+                        })}
                     </fieldset>
                 );
             })}
         </form>
+        {description && <p>{description}</p>}
+        </>
     );
 }

@@ -9,7 +9,6 @@
       { "short": "abvr", "full": "Abréviation" }
     ],
     "dynamicCasing": true,
-    "preventTrigger": true,
     "addSpace": true,
     "caseMatching": true
   }

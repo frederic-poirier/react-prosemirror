@@ -7,33 +7,37 @@ export default function Home() {
     const notes = [
         { id: "1", title: "Note sur ProseMirror", time: '20h' },
         { id: "2", title: "Note pour l'examen d'histoire", time: '1 month' },
+        { id: "4", title: "Note pour le cours d'anglais", time: '1 month' },
+
     ];
 
     return (
         <>
-            <header>
-                <nav className="home-header ui-width">
+            <header className="page">
+                <nav className="home-header">
                     <FileText />
                     <Link to="/settings"> <Settings /></Link>
                 </nav>
             </header>
-            <main className="home ui-width">
+            <main className="home page">
                 <h1>Notes récentes</h1>
-                <ul className="home-notes">
-                    {notes.map((note) => (
-                        <li key={note.id}>
-                            <Link to={`/notes/${note.id}`}>
-                                <span>Last update: {note.time}</span>
-                                {note.title}
+                <section className="overflow">
+                    <ul className="home-notes overflow-content">
+                        {notes.map((note) => (
+                            <li key={note.id}>
+                                <Link to={`/notes/${note.id}`}>
+                                    <span>Last update: {note.time}</span>
+                                    {note.title}
+                                </Link>
+                            </li>
+                        ))}
+                        <li className="home-notes-add">
+                            <Link to="/notes/new">
+                                <Plus />
                             </Link>
                         </li>
-                    ))}
-                    <li className="home-notes-add">
-                        <Link to="/notes/new">
-                            <Plus />
-                        </Link>
-                    </li>
-                </ul>
+                    </ul>
+                </section>
             </main>
         </>
     );

@@ -5,11 +5,11 @@ import './SettingsLayout.css'
 export default function SettingsLayout() {
     return (
         <>
-            <header className="settings-header ui-width">
+            <header className="settings-header page">
                 <Breadcrumbs />
             </header>
 
-            <main className="settings-main ui-width">
+            <main className="settings-main page">
                 <Outlet />
             </main>
         </>

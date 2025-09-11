@@ -3,7 +3,6 @@
     padding: 0.5rem;
     background-color: var(--color-gray-150);
     border-radius: 1rem;
-    margin-top: 1rem;
 
     >* {
         padding: 0.5rem;
@@ -25,6 +24,7 @@
         display: flex;
         width: 100%;
         justify-content: space-between;
+        text-transform: capitalize;
     }
 }
 
@@ -35,7 +35,6 @@ input {
     padding: 0;
     border-radius: 0.25rem;
     font-size: 1rem;
-
 
     &:focus-visible {
         outline: 2px solid var(--color-gray-700);
@@ -127,6 +126,10 @@ input {
 
         h4 {
             font-weight: 400;
+
+            &:not(:first-of-type) {
+                padding-left: 0.5rem;
+            }
         }
     }
 
@@ -153,7 +156,7 @@ input {
         label:first-of-type input {
             border-bottom-left-radius: 1rem;
         }
-    }           
+    }
 
     label {
         font-size: 0;

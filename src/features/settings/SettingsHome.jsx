@@ -9,7 +9,7 @@ export default function SettingsHome() {
         <NavigationListItem link='appearance' />
         <NavigationListItem link='hotkeys' />
       </NavigationList>
-
+      
     </>
   );
 }

@@ -1,17 +1,8 @@
 .home-notes {
     list-style: none;
     padding: 0;
-    display: flex;
-    gap: 0.5rem;
-    overflow-x: auto;
-    scrollbar-width: thin;
-    margin-block: 1rem;
-    padding-bottom: 0.5rem;
-    scrollbar-width: none;
 
     li {
-        display: block;
-
         span {
             color: var(--color-gray-500);
             font-size: 0.875rem;
